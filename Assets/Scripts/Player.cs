@@ -6,14 +6,16 @@ public class Player : MonoBehaviour
 {
     private float maxSpeed = 3f;
     private float jumpSpeed = 15f;
-    private bool isJump = false;
+    //private bool isJump = false;
     Rigidbody2D rigid;
     SpriteRenderer render;
+    Animator animator;
    
     private void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
         render = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
     }
     
     void Update()
@@ -41,10 +43,20 @@ public class Player : MonoBehaviour
         }
 
         //rigid.velocity.y를 해두는 이유는 얘를 0으로 주면 후에 점프하다 멈춤..
-        if(Input.GetButtonDown("Jump") && isJump == false)
+        if(Input.GetButtonDown("Jump") && animator.GetBool("isJumping") == false)
         {
             rigid.AddForce(Vector2.up * jumpSpeed, ForceMode2D.Impulse);
-            isJump = true;
+            animator.SetBool("isJumping", true);
+        }
+
+        //Animator 
+        if(Mathf.Abs(rigid.velocity.x) < 0.3) //횡이동 속도 0.3보다 작으면 멈춘 상태로 간주, Idle애니메이션으로 전환
+        {
+            animator.SetBool("isWalking", false);
+        }
+        else //움직이고 있는 상태
+        {
+            animator.SetBool("isWalking", true);
         }
     }
 
@@ -52,7 +64,7 @@ public class Player : MonoBehaviour
     {
         if(collision.gameObject.tag == "Land")
         {
-            isJump = false;
+            animator.SetBool("isJumping", false);
         }
     }
 }
